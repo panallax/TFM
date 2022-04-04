@@ -19,15 +19,14 @@ d = c/40;  %Distancia mínima entre nodos
 r = 1;     %Radio casquete
 h = 0.3;   %Altura casquete
 %%
-tic
 Nodes = generate_mesh(r,h,d);
 points = generate_random_points(x, y, z, zmin, n);
-sen = load('sen_Alex.mat');
+sen = load('sen_Alex.mat')
 pos = 0:0.16:3;
-frecs = linspace(0.01,150,4096);
+frecs = linspace(0,150,4096);
 
 SL2 = mod_reflectores_Alex(rof,c,rop,cpl,cps,a,frecs);
-E = fft(sen.sen);
+E = fft(sen);
 sum_F = zeros(length(frecs),length(pos));
 
 for j=1:length(pos)
@@ -37,8 +36,8 @@ for j=1:length(pos)
         k = 2*pi/(frecs(i)*c);
         T = mat_T(Nodes, points, k);
         a = SL2(i)*eye(n);
-        R = a;
-        F = T.'*R*T*E_;
+        R = a*T;
+        F = T'*R*T*E_;
         sum_F(i,j) = sum(F);
     end
 end
@@ -49,7 +48,7 @@ for i=1:length(pos)
 end
 
 
-toc
+
 scatter3(points(:,1), points(:,2), points(:,3), "filled")
 hold on
 scatter3(Nodes(:,1),Nodes(:,2),Nodes(:,3), "filled")
