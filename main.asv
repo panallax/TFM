@@ -4,7 +4,7 @@ x = 5;
 y = 2;
 z = 1;
 zmin = 2;
-n = 1;
+n = 30;
 
 %%%%%%% DATOS REFLECTANCIA %%%%%
 rof = 998e-9; %*e-9
@@ -22,7 +22,7 @@ h = 0.3;   %Altura casquete
 tic
 Nodes = generate_mesh(r,h,d);
 % points = generate_random_points(x, y, z, zmin, n);
-points = [1.5 0 14];
+points = [1.5 0 1];
 sen = load('sen_Alex.mat');
 pos = 0:0.016:3;
 frecs = linspace(0.01,150,4096);
@@ -30,18 +30,18 @@ frecs = linspace(0.01,150,4096);
 SL2 = mod_reflectores_Alex(rof,c,rop,cpl,cps,a,frecs);
 E = fft(sen.sen);
 sum_F = zeros(length(frecs),length(pos));
- 
- for j=1:length(pos)
-     Nodes(:,1) = Nodes(:,1) + 0.016;
+
+for j=1:length(pos)
+    Nodes(:,1) = Nodes(:,1) + 0.016;
     for i=1:length(frecs)
         E_ = E(i)*ones(length(Nodes),1);
-        k = 2*pi*frecs(i)/c;
+        k = 2*pi/(frecs(i)*c);
         T = mat_T(Nodes, points, k);
         R = SL2(i)*eye(n);
         F = T.'*R*T*E_;
         sum_F(i,j) = sum(F);
     end
- end
+end
 
 sum_F_t = zeros(length(frecs), length(pos));
 for i=1:length(pos)
@@ -50,9 +50,9 @@ end
 
 imagesc(abs(sum_F_t))
 toc
-% scatter3(points(:,1), points(:,2), points(:,3), "filled")
-% hold on
-% scatter3(Nodes(:,1),Nodes(:,2),Nodes(:,3), "filled")
+scatter3(points(:,1), points(:,2), points(:,3), "filled")
+hold on
+scatter3(Nodes(:,1),Nodes(:,2),Nodes(:,3), "filled")
 
 
 
