@@ -14,12 +14,12 @@ cpl = 1.585;
 cps = 0;
 
 %%%%%% ATENUACIÓN %%%%%%%%%
-at=2.15e-5;
+at = 2.15e-5;
 a = 5e-3;
 
 %%%%%%%% DATOS CASQUETE %%%%%%%
 d = c/20/2;                     %Distancia mínima entre nodos
-r = 1;                          %Radio casquete
+r = 3;                          %Radio casquete
 Rc = 14;                        %Radio de curvatura
 h = Rc*(1-sqrt(1-(r/Rc)^2));    %Altura casquete
 %%
@@ -37,7 +37,7 @@ sen = load('sen_Alex.mat');
 %%%%%%%%%%%%%%%%%%%%%% (nos quedamos con el intervaslo de tiempo
 %%%%%%%%%%%%%%%%%%%%%% estrictamente necesario: 2048 puntos)
 
-frecs = linspace(0.01,150,2048);
+frecs = linspace(0.01,75,2048);
 senc = sen.sen(1:2048);
 pos = 0:0.016:3;
 
@@ -61,10 +61,10 @@ sum_F = zeros(length(frecs),length(pos));
 delete(gcp("nocreate"))
 parpool("local", 4)
 
-for j=1:length(pos)
+for j = 1:length(pos)
     Nodes(:,1) = Nodes(:,1) + 0.016;
     [num2str(j) '/' num2str(length(pos))];
-    parfor i=1:length(frecs)
+    parfor i = 1:length(frecs)
         if find(freqind==i)
             E_ = E(i)*ones(length(Nodes),1);
             T = mat_T(Nodes, points, k(i));
