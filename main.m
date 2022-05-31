@@ -37,7 +37,7 @@ sen = load('sen_Alex.mat');
 %%%%%%%%%%%%%%%%%%%%%% (nos quedamos con el intervaslo de tiempo
 %%%%%%%%%%%%%%%%%%%%%% estrictamente necesario: 2048 puntos)
 
-frecs = linspace(0.01,75,2048);
+frecs = linspace(0.01,150,2048);
 senc = sen.sen(1:2048);
 pos = 0:0.016:3;
 
@@ -46,7 +46,7 @@ cc = c*(1+1i*c/2/pi*at*frecs);
 k = 2*pi*frecs./cc;
 
 SL2 = mod_reflectores_Alex(rof,c,rop,cpl,cps,a,frecs);
-E = fft(sen.sen);
+E = fft(senc);
 E(round(length(E)/2):end) = 0;
 %%%%%%%%%%%%%%%%%%% RESTRINGIR FRECUENCIAS 2 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 [v imax]=max(abs(E(1:length(E)/2)));
@@ -58,14 +58,14 @@ freqind = find(abs(Ev)>0);
 sum_F = zeros(length(frecs),length(pos));
 sum_FR = zeros(length(frecs),length(pos));
 
-delete(gcp('nocreate'))
-numCores = feature('numcores');
-parpool(numCores)
+% delete(gcp('nocreate'))
+% numCores = feature('numcores');
+% parpool(numCores)
 
 for j = 1:length(pos)
     Nodes(:,1) = Nodes(:,1) + 0.016;
 %     [num2str(j) '/' num2str(length(pos))];
-    parfor i = 1:length(frecs)
+    for i = 1:length(frecs)
         if find(freqind==i)
             E_ = E(i)*ones(length(Nodes),1);
             T = mat_T(Nodes, points, k(i));
