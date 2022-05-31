@@ -19,7 +19,7 @@ a = 5e-3;
 
 %%%%%%%% DATOS CASQUETE %%%%%%%
 d = c/20/2;                     %Distancia mínima entre nodos
-r = 3;                          %Radio casquete
+r = 2;                          %Radio casquete
 Rc = 14;                        %Radio de curvatura
 h = Rc*(1-sqrt(1-(r/Rc)^2));    %Altura casquete
 %%
@@ -58,7 +58,6 @@ freqind = find(abs(Ev)>0);
 sum_F = zeros(length(frecs),length(pos));
 sum_FR = zeros(length(frecs),length(pos));
 
-delete(gcp('nocreate'))
 numCores = feature('numcores');
 parpool(numCores)
 
