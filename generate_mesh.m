@@ -19,11 +19,11 @@ function [Nodes] = generate_mesh(r,h,d)
         z = r*(1 - cos(theta));
         Ra = r*sin(theta);
         phi = 0;
-        for i=1:round(2*pi/(d/Ra))
+        for i=1:round(2*pi/(10*(d/Ra)))
             M(i,1) = Ra*cos(phi);
             M(i,2) = Ra*sin(phi);
             M(i,3) = z;
-            phi = phi + d/Ra;
+            phi = phi + 10*d/Ra;
         end
         Nodes = [Nodes; M];
         theta = theta + dth;

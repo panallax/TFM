@@ -2,9 +2,10 @@
 %%%%%%% DATOS NUBE PUNTOS %%%%%
 x = 5;
 y = 2;
-z = 1;
-zmin = 2;
-n = 1;
+z = 6;
+zmin = 11;
+ro = 10;
+n = round(x*y*z*ro);
 
 %%%%%%% DATOS REFLECTANCIA %%%%%
 rof = 998e-9; %*e-9
@@ -15,18 +16,17 @@ cps = 0;
 
 %%%%%% ATENUACIÓN %%%%%%%%%
 at = 2.15e-5;
-a = 5e-3;
+a = 5e-3; %
 
 %%%%%%%% DATOS CASQUETE %%%%%%%
 d = c/20/2;                     %Distancia mínima entre nodos
-r = 3;                          %Radio casquete
-Rc = 14;                        %Radio de curvatura
+r = 3;       %                   %Radio casquete
+Rc = 14;     %                   %Radio de curvatura
 h = Rc*(1-sqrt(1-(r/Rc)^2));    %Altura casquete
 %%
-
 tic
 Nodes = generate_mesh(Rc,h,d);
-% points = generate_random_points(x, y, z, zmin, n);
+% points = generate_random_points(x, y, z, zmin, n); %
 points = [1.5 0 14];
 sen = load('sen_Alex.mat');
 
@@ -67,9 +67,10 @@ for j = 1:length(pos)
 %     [num2str(j) '/' num2str(length(pos))];
     for i = 1:length(frecs)
         if find(freqind==i)
-            E_ = E(i)*ones(length(Nodes),1);
+%             E_ = E(i)*ones(length(Nodes),1);
             T = mat_T(Nodes, points, k(i));
             R = SL2(i)*eye(n);
+            R = sparse(R);
             F = T.'*R*sum(T,2);
             sum_F(i,j) = sum(F)*E(i);
         end
@@ -77,18 +78,24 @@ for j = 1:length(pos)
     sum_FR(:,j)=sum_F(:,j).*exp(1i*2*pi*(frecs')*12);
 end
 
-sum_F_t = zeros(length(frecs), length(pos));
+sum_F_t = zeros(length(frecs), length(pos)); % 
 for i=1:length(pos)
     sum_F_t(:,i) = ifft(sum_FR(:,i));
 end
-
-imagesc(abs(sum_F_t))
 toc
+imagesc(pos,linspace(zmin,z+zmin, 2048), abs(sum_F_t))
+daspect([1 1 1])
+colormap('jet')
+
+
 % scatter3(points(:,1), points(:,2), points(:,3), "filled")
 % hold on
 % scatter3(Nodes(:,1),Nodes(:,2),Nodes(:,3), "filled")
 
 
+
+
+%%%%%% CAPTURADOR DE GIFS
 
 % nImages = length(pos);
 % 
@@ -100,3 +107,38 @@ toc
 %     frame = getframe(fig);
 %     im{idx} = frame2im(frame);
 % end
+% 
+
+%%%%% CODIGO TENSORIAL %%%%%
+
+% tic
+% nodes_steps = repmat(points, 1, 1, length(pos));
+% nodes_steps = permute(nodes_steps,[1 3 2]);
+% vec = 1:length(pos);
+% M = repmat(vec, length(points(:, 1)), 1);
+% nodes_steps(:, :, 1) = points(:, 1)  + M*(pos(2)-pos(1));
+% nodes_steps_ =  reshape(nodes_steps,[size(nodes_steps, 1)* size(nodes_steps, 2), size(nodes_steps, 3)]);
+% dist = pdist2(nodes_steps_, Nodes, "euclidean");
+% dist = reshape(dist, [size(nodes_steps, 1), size(nodes_steps, 2), size(Nodes, 1)]);
+% dist = permute(dist,[1 3 2]);
+% 
+% T_total = exp(permute(k(:) .* permute(dist, [4 1 2 3]) * -1i, [2,3,4,1])) ./ dist;
+% T_total = permute(T_total, [2,1,3,4]);
+% I = eye(length(Nodes));
+% SL2_total =  SL2(:) .* permute(I, [3 2 1]);
+% SL2_total = permute(SL2_total, [2,3,1]);
+% 
+% for i = 1:length(pos)
+%     sub_T = squeeze(T_total(:, :, i, :));
+%     prod_st = pagemtimes(permute(sub_T, [2,1,3]), SL2_total);
+%     prod_st = sum(squeeze(pagemtimes(prod_st, sum(sub_T,2))), 1);
+%     sum_FR(:, i) = prod_st(1, :).*E.*exp(1i*2*pi*(frecs)*12);
+% end
+% 
+% sum_F_t = zeros(length(frecs), length(pos));
+% for i=1:length(pos)
+%     sum_F_t(:,i) = ifft(sum_FR(:,i));
+% end
+% 
+% imagesc(abs(sum_F_t))
+% toc
