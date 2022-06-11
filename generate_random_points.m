@@ -13,7 +13,7 @@ function [points] = generate_random_points(x,y,z,zmin,n)
         coords(1,i) = -dims(i)/2;
         coords(2,i) = dims(i)/2;
     end
-    coords(:,1) = [-1 x+1]; 
+    coords(:,1) = [-0.8 x+0.8]; 
     coords(:,3) = coords(:,3)+ (zmin + z/2);
     for i=1:length(coords)
         points(:,i) = coords(1,i) + (coords(2,i) - coords(1,i))*rand(n,1);
