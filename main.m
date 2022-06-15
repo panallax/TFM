@@ -24,19 +24,21 @@ r = 3;       %                   %Radio casquete
 Rc = 14;     %                   %Radio de curvatura
 h = Rc*(1-sqrt(1-(r/Rc)^2));    %Altura casquete
 %%%%%%%%% TEJIDOS E INTERFASES %%%%%%
-x_t = -0.8:0.05:3.8;
-y_t = -0.8:0.05:0.8;
-z_1 = 11;
-z_2 = 12;
-ro_t = 100;
+x_t = -0.8:0.15:3.8;
+y_t = -0.8:0.15:0.8;
+z_1 = 10.8;
+z_2 = 12.2;
+ro_t = 500;
 %%
 
 tic
 Nodes = generate_mesh(Rc,h,d);
 % reflector_points = generate_random_points(x, y, z, zmin, n_r); 
-[points,n] = tissue_generator(x_t,y_t,z_1,z_2, ro_t);
+[tissue_points,n_t] = tissue_generator(x_t,y_t,z_1,z_2, ro_t);
 interfase_points_1 = interfase_generator(x_t,y_t,z_1);
 interfase_points_2 = interfase_generator(x_t,y_t,z_2);
+points = [tissue_points; interfase_points_1; interfase_points_2];
+n = length(points);
 % points = [tissue_points; reflector_points];
 % n = n_r + n_t;
 
