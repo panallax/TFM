@@ -38,6 +38,7 @@ Nodes = generate_mesh(Rc,h,d);
 interfase_points_1 = interfase_generator(x_t,y_t,z_1);
 interfase_points_2 = interfase_generator(x_t,y_t,z_2);
 points = [tissue_points; interfase_points_1; interfase_points_2];
+sub = squareform(pdist(points));
 n = length(points);
 % points = [tissue_points; reflector_points];
 % n = n_r + n_t;
@@ -77,15 +78,18 @@ sum_FR = zeros(length(frecs),length(pos));
 % parpool(numCores)
 
 for j = 1:length(pos)
+    disp(j)
     Nodes(:,1) = Nodes(:,1) + 0.016;
 %     [num2str(j) '/' num2str(length(pos))];
     for i = 1:length(frecs)
         if find(freqind==i)
 %             E_ = E(i)*ones(length(Nodes),1);
             T = mat_T(Nodes, points, k(i));
-            R = SL2(i)*eye(n);
-            R = sparse(R);
-            F = T.'*R*sum(T,2);
+            intern_dist = exp(-1i*k(i).*sub)./sub;
+            intern_dist(1:1+size(intern_dist,1):end) = 0;
+            R = intern_dist + SL2(i)*eye(n);
+%             R = sparse(R);
+            F = T.'*(R*sum(T,2));
             sum_F(i,j) = sum(F)*E(i);
         end
     end
