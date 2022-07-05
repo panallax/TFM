@@ -23,6 +23,7 @@ d = c/20/2;                     %Distancia mínima entre nodos
 r = 3;       %                   %Radio casquete
 Rc = 14;     %                   %Radio de curvatura
 h = Rc*(1-sqrt(1-(r/Rc)^2));    %Altura casquete
+
 %%%%%%%%% TEJIDOS E INTERFASES %%%%%%
 x_t = -0.8:0.15:3.8;
 y_t = -0.8:0.15:0.8;
@@ -31,13 +32,35 @@ z_2 = 12.2;
 ro_t = 500;
 %%
 
+
+
+%%%% FLUIDO 1 y 2
+rot = 1073e-9; %*e-9 % densidad tejido
+ct = 1.638;   % velocidad tejido
+zt = rot*ct; % impedancia tejido
+ca = 1.5      % velocidad agua
+roa = 998e-9;  %densidada agua
+za = roa*ca; %impedancia agua
+cr = (za-zt)/(za+zt); %coeficiente reflexión
+ct = 2*za/(zt+za); %coeficiente transmisión
+
+rop = 1064e-9;
+cpl = 1.585;
+cps = 0;
+
+%%%%%%% ATENUACIÓN EN K %%%%%%%%%%%%
+cct = ct*(1+1i*ct/2/pi*at*frecs);
+cca = ca*(1+1i*ca/2/pi*at*frecs);
+kt = 2*pi*frecs./cct;
+ka = 2*pi*frecs./cca;
+
 tic
 Nodes = generate_mesh(Rc,h,d);
 % reflector_points = generate_random_points(x, y, z, zmin, n_r); 
 [tissue_points,n_t] = tissue_generator(x_t,y_t,z_1,z_2, ro_t);
-interfase_points_1 = interfase_generator(x_t,y_t,z_1);
-interfase_points_2 = interfase_generator(x_t,y_t,z_2);
-points = [tissue_points; interfase_points_1; interfase_points_2];
+% interfase_points_1 = interfase_generator(x_t,y_t,z_1);
+interfase_points = interfase_generator(x_t,y_t,z_2);
+points = [tissue_points; interfase_points];
 sub = squareform(pdist(points));
 n = length(points);
 % points = [tissue_points; reflector_points];
@@ -54,12 +77,10 @@ frecs = linspace(0.01,150,2048);
 senc = sen.sen(1:2048);
 pos = 0:0.016:3;
 
-%%%%%%% ATENUACIÓN EN K %%%%%%%%%%%%
-cc = c*(1+1i*c/2/pi*at*frecs);
-k = 2*pi*frecs./cc;
 
 % SL2_r = mod_reflectores_Alex(rof,c,rop,cpl,cps,a_r,frecs);
-SL2 = mod_reflectores_Alex(rof,c,rop,cpl,cps,a_t,frecs);
+SL2 = mod_reflectores_Alex(rof,c,rop,cpl,cps,a_t,frecs); 
+diagonal = SL2*ones(1,nt) + cr*ones(1,n-nt)
 
 E = fft(senc);
 E(round(length(E)/2):end) = 0;
@@ -90,6 +111,7 @@ for j = 1:length(pos)
             R = SL2(i)^2.*intern_dist + SL2(i).*eye(n);
 %             R = sparse(R);
             F = T.'*(R*sum(T,2));
+            F = T1.'*T2.'*SL2(i)*(T2*sum(T1,2));
             sum_F(i,j) = sum(F)*E(i);
         end
     end
