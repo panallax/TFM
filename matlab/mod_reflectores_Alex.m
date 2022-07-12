@@ -4,12 +4,12 @@ function [SL2]=mod_reflectores_Alex(rof,c,rop,cpl,cps,a,frecs)
 %%%% REFLECTORES %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%%%%%%%%%% Modelo simplificado: se asume una difracción puramente radial desde el
-%%%%%%%%%% dispersor, con el valor correspondiente a dispersión directa (¿o
-%%%%%%%%%% retrodispersión? a comprobar)
+%%%%%%%%%% Modelo simplificado: se asume una difracciï¿½n puramente radial desde el
+%%%%%%%%%% dispersor, con el valor correspondiente a dispersiï¿½n directa (ï¿½o
+%%%%%%%%%% retrodispersiï¿½n? a comprobar)
 
 
-%%%%%%%%%% Los parámetros de entrada son:
+%%%%%%%%%% Los parï¿½metros de entrada son:
 %%%%%%%%%% rof y rop, densidades del fluido y el dispersor en kg/mm^3
 %%%%%%%%%% c,cpl y cps son la velocidad del fluido, la velocidad
 %%%%%%%%%% longitudinal del dispersor y la velocidad transversal del
@@ -17,13 +17,13 @@ function [SL2]=mod_reflectores_Alex(rof,c,rop,cpl,cps,a,frecs)
 %%%%%%%%%% a es el radio del dispersor en mm
 %%%%%%%%%% frecs es el vector de las frecuencias
 
-%%%%%%%%%% El parámetro de salida SL2 es la presión dispersada compleja en
-%%%%%%%%%% función de la frecuencia.
+%%%%%%%%%% El parï¿½metro de salida SL2 es la presiï¿½n dispersada compleja en
+%%%%%%%%%% funciï¿½n de la frecuencia.
 
 
 
 
-%% Modelo celular (leucocito) ¡¡¡ATENCION, ESTOS TRES PARÁMETROS VAN FUERA DE LA FUNCIÓN, EN EL PROGRAMA PRINCIPAL!!!
+%% Modelo celular (leucocito) ï¿½ï¿½ï¿½ATENCION, ESTOS TRES PARï¿½METROS VAN FUERA DE LA FUNCIï¿½N, EN EL PROGRAMA PRINCIPAL!!!
 % rof = 998
 % c = 1500
 % rop = 1064
@@ -53,9 +53,10 @@ x=k*a;
 x1=k1*a;
 x2=k2*a;
 
-nfo=5;         %%% Orden máximo de la serie de polinomios.
+nfo=5;         %%% Orden mï¿½ximo de la serie de polinomios.
 clear ln2
 SL2=zeros(1,length(frecs));
+
 for n=0:nfo
     jn_1=sqrt(pi/2 ./x1).*besselj(n+0.5,x1);
     jnmas1_1=sqrt(pi/2 ./x1).*besselj(n+1.5,x1);
