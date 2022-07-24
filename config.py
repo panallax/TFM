@@ -16,7 +16,7 @@ a_t = 15e-3
 d = 1.5/20/2                     #Distancia mínima entre nodos (1.5 es ca)
 r = 3       #                   #Radio casquete
 Rc = 14     #                   #Radio de curvatura
-h = Rc*(1-np.sqrt(1-(r/Rc)^2))    #Altura casquete
+h = Rc*(1-np.sqrt(1-(r/Rc)**2))    #Altura casquete
 
 ######### TEJIDOS E INTERFASES ######
 x_t = np.arange(-0.8,3.8,0.04)

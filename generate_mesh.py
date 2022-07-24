@@ -3,7 +3,7 @@ import numpy as np
 
 def generate_mesh(r,h,d):
     dth = d/r
-    theta = 0
+    theta = 1e-9
     nodes = np.zeros((1,3))
 
     z = 0
