@@ -40,7 +40,7 @@ n = len(points)
 #### [~,indt]=min(abs(sen.t-9.3))=1396, reducimos a 2048 puntos
 ###################### (nos quedamos con el intervaslo de tiempo
 ###################### estrictamente necesario: 2048 puntos)
-sen = scipy.io.loadmat('/Users/alex/Desktop/TFM/TFM/sen_Alex.mat')
+sen = scipy.io.loadmat('sen_Alex.mat')
 frecs = np.linspace(0.01,150,2048)
 senc = sen["sen"][0][:2048]
 pos = np.arange(0,3,0.016)
