@@ -3,3 +3,4 @@ mpmath
 scipy
 matplotlib
 pymars
+numba
