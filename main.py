@@ -3,6 +3,7 @@ from scipy.spatial.distance import squareform, pdist, cdist
 import scipy.io
 import scipy.fft
 from scipy.signal.windows import tukey
+# import mars.tensor as np
 import matplotlib.pyplot as plt
 plt.jet()
 
@@ -14,8 +15,10 @@ from mod_reflectores import mod_reflectores
 from tissue_generator import tissue_generator
 from config import *
 
-
-
+# import mars.tensor as np
+import time
+# import mars
+# mars.new_session()
 Nodes = generate_mesh(Rc,h,d)
 # reflector_points = generate_random_points(x, y, z, zmin, n_r) 
 points = np.array([[1.5, 0, 13]])
@@ -85,6 +88,7 @@ for j in range(len(pos)):
     v = np.zeros((1,f))
     for i in range(f):
         if np.nonzero(freqind==i):
+            t = time.time()
 #             E_ = E[i]*np.ones(len(Nodes),1)
 #             T = mat_T(Nodes, points, k[i])
             T1 = mat_T(nodes_steps[:,:,j], interfase_points, kt[i])
@@ -99,7 +103,8 @@ for j in range(len(pos)):
 #             F = T.T*(R*sum(T,2))
             F = np.matmul(T1.T,T2.T)*SL2_r[i]*np.matmul(T2,np.sum(T1,1))
             v.flat[i] = np.sum(F)*E[i]
-
+            print(time.time()-t)
+            
     sum_FR.flat[:,j]=v.T*np.exp(1j*2*np.pi*(frecs.T)/ct*zmin)
 
 sum_FR = sum_FR*c_t**2

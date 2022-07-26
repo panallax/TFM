@@ -2,3 +2,4 @@ numpy
 mpmath
 scipy
 matplotlib
+pymars
