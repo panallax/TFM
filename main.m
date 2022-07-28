@@ -24,8 +24,8 @@ Rc = 14;     %                   %Radio de curvatura
 h = Rc*(1-sqrt(1-(r/Rc)^2));    %Altura casquete
 
 %%%%%%%%% TEJIDOS E INTERFASES %%%%%%
-x_t = -0.8:0.15:3.8;
-y_t = -0.8:0.15:0.8;
+x_t = -0.8:0.035:3.8;
+y_t = -0.8:0.035:0.8;
 z_1 = 8.8;
 z_2 = 10;
 ro_t = 500;
@@ -40,8 +40,8 @@ zt = rot*ct; % impedancia tejido
 ca = 1.5;      % velocidad agua
 roa = 998e-9;  %densidada agua
 za = roa*ca; %impedancia agua
-cr = (za-zt)/(za+zt); %coeficiente reflexión
-ct = 2*za/(zt+za); %coeficiente transmisión
+c_r = (za-zt)/(za+zt); %coeficiente reflexión
+c_t = 2*za/(zt+za); %coeficiente transmisión
 
 %%%%Propiedades núcleos %%%%
 rhon = 1090e-9;
@@ -60,7 +60,7 @@ reflector_points = generate_random_points(x, y, z, zmin, n_r);
 % interfase_points_1 = interfase_generator(x_t,y_t,z_1);
 interfase_points = interfase_generator(x_t,y_t,z_2);
 % points = [tissue_points; interfase_points];
-points = [1 0 11; 1.5 0 11.5; 2 0 12];
+points = [1 0 11; 1.5 0 12; 2 0 13];
 % sub = squareform(pdist(points));
 
 % points = [tissue_points; reflector_points];
@@ -112,11 +112,11 @@ M = repmat(vec, length(Nodes(:, 1)), 1);
 nodes_steps(:, :, 1) = Nodes(:, 1)  + M*(pos(2)-pos(1));
 nodes_steps = permute(nodes_steps, [1 3 2]);
 
-% delete(gcp('nocreate'))
-% numCores = feature('numcores');
-% parpool(numCores)
+delete(gcp('nocreate'))
+numCores = feature('numcores');
+parpool(numCores)
 
-for j = 1:length(pos)
+parfor j = 1:length(pos)
     disp(j)
     v = zeros(1,f);
     for i = 1:length(frecs)
@@ -128,7 +128,7 @@ for j = 1:length(pos)
 %             R = SL2(i)^2.*intern_dist + SL2(i).*eye(n);
 %             R = sparse(R);
 %             F = T.'*(R*sum(T,2));
-%             F = T1.'*T2.'*SL2(i)*(T2*sum(T1,2));
+%             F = T1.'T2.'*SL2(i)(T2*sum(T1,2));
 %             sum_F(i,j) = sum(F)*E(i);
             T1 = mat_T(nodes_steps(:,:,j), interfase_points, kt(i));
             T2 = exp(-1i*ka(i).*t2)./t2;
@@ -193,7 +193,7 @@ colormap('jet')
 %     sub_T = squeeze(T_total(:, :, i, :));
 %     prod_st = pagemtimes(permute(sub_T, [2,1,3]), SL2_total);
 %     prod_st = sum(squeeze(pagemtimes(prod_st, sum(sub_T,2))), 1);
-%     sum_FR(:, i) = prod_st(1, :).*E.*exp(1i*2*pi*(frecs)*12);
+%     sum_FR(:, i) = prod_st(1, :).E.*exp(1i*2*pi(frecs)*12);
 % end
 % 
 % sum_F_t = zeros(length(frecs), length(pos));
