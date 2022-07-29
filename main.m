@@ -7,6 +7,7 @@ zmin = 11;
 ro = 10;
 n_r = round(x*y*z*ro);
 n_r = 3;
+z0 = 8;
 
 %%%%%%% DATOS REFLECTANCIA %%%%%
 rof = 998e-9; %*e-9
@@ -27,7 +28,7 @@ h = Rc*(1-sqrt(1-(r/Rc)^2));    %Altura casquete
 x_t = -0.8:0.035:3.8;
 y_t = -0.8:0.035:0.8;
 z_1 = 8.8;
-z_2 = 10;
+z_2 = 8.1;
 ro_t = 500;
 %%
 
@@ -56,7 +57,7 @@ cpl = 1.585;
 tic
 Nodes = generate_mesh(Rc,h,d);
 reflector_points = generate_random_points(x, y, z, zmin, n_r); 
-[tissue_points,n_t] = tissue_generator(x_t,y_t,z_1,z_2, ro_t);
+% [tissue_points,n_t] = tissue_generator(x_t,y_t,z_1,z_2, ro_t);
 % interfase_points_1 = interfase_generator(x_t,y_t,z_1);
 interfase_points = interfase_generator(x_t,y_t,z_2);
 % points = [tissue_points; interfase_points];
@@ -72,8 +73,9 @@ points = [1 0 11; 1.5 0 12; 2 0 13];
 %%%% [~,indt]=min(abs(sen.t-9.3))=1396, reducimos a 2048 puntos
 %%%%%%%%%%%%%%%%%%%%%% (nos quedamos con el intervaslo de tiempo
 %%%%%%%%%%%%%%%%%%%%%% estrictamente necesario: 2048 puntos)
+fs = 150; %Frecuencia de muestreo
 sen = load('sen_Alex.mat');
-frecs = linspace(0.01,150,2048);
+frecs = linspace(0.01,fs,2048); 
 senc = sen.sen(1:2048);
 pos = 0:0.016:3;
 
@@ -107,9 +109,9 @@ t2 = pdist2(interfase_points, points,"euclidean")';
 
 nodes_steps = repmat(Nodes, 1, 1, length(pos));
 nodes_steps = permute(nodes_steps,[1 3 2]);
-vec = 1:length(pos);
+vec = 0:length(pos)-1;
 M = repmat(vec, length(Nodes(:, 1)), 1);
-nodes_steps(:, :, 1) = Nodes(:, 1)  + M*(pos(2)-pos(1));
+nodes_steps(:, :, 1) = Nodes(:, 1)  + M*(pos(3)-pos(2));
 nodes_steps = permute(nodes_steps, [1 3 2]);
 
 delete(gcp('nocreate'))
@@ -122,21 +124,22 @@ parfor j = 1:length(pos)
     for i = 1:length(frecs)
         if find(freqind==i)
 %             E_ = E(i)*ones(length(Nodes),1);
-%             T = mat_T(Nodes, points, k(i));
+%             T = mat_T(nodes_steps(:,:,j), points, ka(i));
 %             intern_dist = exp(-1i*k(i).*sub)./sub;
 %             intern_dist(1:1+size(intern_dist,1):end) = 0;
-%             R = SL2(i)^2.*intern_dist + SL2(i).*eye(n);
+%             R = SL2_r(i).*eye(n);
+%             R = SL2(i)^2.*intern_dist + SL2_r(i).*eye(n);
 %             R = sparse(R);
 %             F = T.'*(R*sum(T,2));
 %             F = T1.'T2.'*SL2(i)(T2*sum(T1,2));
 %             sum_F(i,j) = sum(F)*E(i);
-            T1 = mat_T(nodes_steps(:,:,j), interfase_points, kt(i));
+            T1 = mat_T(nodes_steps(:,:,j), interfase_points, ka(i));
             T2 = exp(-1i*ka(i).*t2)./t2;
             F = T1.'*T2.'*SL2_r(i)*(T2*sum(T1,2));
             v(i) = sum(F)*E(i);
         end
     end
-    sum_FR(:,j) = v'.*exp(1i*2*pi*(frecs')/ct*zmin);
+    sum_FR(:,j) = v'.*exp(1i*2*pi*(frecs')/ct*z0);
 
 end
 
@@ -144,7 +147,7 @@ sum_FR = sum_FR*c_t^2;
 sum_F_t = ifft(sum_FR);
 
 toc
-imagesc(pos,linspace(zmin,z+zmin, 2048), abs(sum_F_t))
+imagesc(pos,linspace(z0,z0+(2048-1)/fs/2*ca, 2048), abs(sum_F_t))
 daspect([1 1 1])
 colormap('jet')
 
