@@ -120,14 +120,14 @@ parpool(numCores)
 
 parfor j = 1:length(pos)
     disp(j)
-    v = zeros(1,f);
+    v = zeros(f,1);
     for i = 1:length(frecs)
         if find(freqind==i)
 %             E_ = E(i)*ones(length(Nodes),1);
 %             T = mat_T(nodes_steps(:,:,j), points, ka(i));
 %             intern_dist = exp(-1i*k(i).*sub)./sub;
 %             intern_dist(1:1+size(intern_dist,1):end) = 0;
-%             R = SL2_r(i).*eye(n);
+%             R = SL2_r(i).*eye(n_r);
 %             R = SL2(i)^2.*intern_dist + SL2_r(i).*eye(n);
 %             R = sparse(R);
 %             F = T.'*(R*sum(T,2));
@@ -139,7 +139,7 @@ parfor j = 1:length(pos)
             v(i) = sum(F)*E(i);
         end
     end
-    sum_FR(:,j) = v'.*exp(1i*2*pi*(frecs')/ct*z0);
+    sum_FR(:,j) = v.*exp(-1i*2*pi*(frecs')/ct*z0);
 
 end
 
