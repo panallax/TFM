@@ -3,10 +3,10 @@
 x = 5;
 y = 2;
 z = 6;
-zmin = 11;
+zmin = 10.2;
 ro = 10;
 n_r = round(x*y*z*ro);
-n_r = 3;
+n_r = 5;
 z0 = 8;
 
 %%%%%%% DATOS REFLECTANCIA %%%%%
@@ -61,7 +61,7 @@ reflector_points = generate_random_points(x, y, z, zmin, n_r);
 % interfase_points_1 = interfase_generator(x_t,y_t,z_1);
 interfase_points = interfase_generator(x_t,y_t,z_2);
 % points = [tissue_points; interfase_points];
-points = [1 0 11; 1.5 0 12; 2 0 13];
+points = [0.25 0 8; 0.5 0 9; .75 0 10; 1 0 11; 1.25 0 12; 1.5 0 13; 1.75 0 14];
 % sub = squareform(pdist(points));
 
 % points = [tissue_points; reflector_points];
@@ -139,7 +139,7 @@ for j = 1:length(pos)
             v(i) = sum(F)*E(i);
         end
     end
-    sum_FR(:,j) = v'.*exp(1i*2*pi*(frecs')/ct*z0);
+    sum_FR(:,j) = v.*exp(1i*4*pi*(frecs')/ct*z0);
 
 end
 

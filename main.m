@@ -3,10 +3,10 @@
 x = 5;
 y = 2;
 z = 6;
-zmin = 11;
+zmin = 10.2;
 ro = 10;
 n_r = round(x*y*z*ro);
-n_r = 3;
+n_r = 11;
 z0 = 8;
 
 %%%%%%% DATOS REFLECTANCIA %%%%%
@@ -61,7 +61,8 @@ reflector_points = generate_random_points(x, y, z, zmin, n_r);
 % interfase_points_1 = interfase_generator(x_t,y_t,z_1);
 interfase_points = interfase_generator(x_t,y_t,z_2);
 % points = [tissue_points; interfase_points];
-points = [1 0 11; 1.5 0 12; 2 0 13];
+points = [0.25 0 8; 0.5 0 9; .75 0 10; 1 0 11; 1.25 0 12; 1.5 0 13; 1.75 0 14; 2 0 15; 2.25 0 16; 2.5 0 17; 2.75 0 18];
+points(:,3) = points(:,3) - 0.8; %Correcion desfase 0.8
 % sub = squareform(pdist(points));
 
 % points = [tissue_points; reflector_points];
@@ -114,32 +115,32 @@ M = repmat(vec, length(Nodes(:, 1)), 1);
 nodes_steps(:, :, 1) = Nodes(:, 1)  + M*(pos(3)-pos(2));
 nodes_steps = permute(nodes_steps, [1 3 2]);
 
-delete(gcp('nocreate'))
-numCores = feature('numcores');
-parpool(numCores)
+% delete(gcp('nocreate'))
+% numCores = feature('numcores');
+% parpool(numCores)
 
-parfor j = 1:length(pos)
+for j = 1:length(pos)
     disp(j)
     v = zeros(f,1);
     for i = 1:length(frecs)
         if find(freqind==i)
 %             E_ = E(i)*ones(length(Nodes),1);
-%             T = mat_T(nodes_steps(:,:,j), points, ka(i));
+            T = mat_T(nodes_steps(:,:,j), points, ka(i));
 %             intern_dist = exp(-1i*k(i).*sub)./sub;
 %             intern_dist(1:1+size(intern_dist,1):end) = 0;
-%             R = SL2_r(i).*eye(n_r);
+            R = SL2_r(i).*eye(n_r);
 %             R = SL2(i)^2.*intern_dist + SL2_r(i).*eye(n);
-%             R = sparse(R);
-%             F = T.'*(R*sum(T,2));
+            R = sparse(R);
+            F = T.'*(R*sum(T,2));
 %             F = T1.'T2.'*SL2(i)(T2*sum(T1,2));
 %             sum_F(i,j) = sum(F)*E(i);
-            T1 = mat_T(nodes_steps(:,:,j), interfase_points, ka(i));
-            T2 = exp(-1i*ka(i).*t2)./t2;
-            F = T1.'*T2.'*SL2_r(i)*(T2*sum(T1,2));
+%             T1 = mat_T(nodes_steps(:,:,j), interfase_points, ka(i));
+%             T2 = exp(-1i*ka(i).*t2)./t2;
+%             F = T1.'*T2.'*SL2_r(i)*(T2*sum(T1,2));
             v(i) = sum(F)*E(i);
         end
     end
-    sum_FR(:,j) = v.*exp(-1i*2*pi*(frecs')/ct*z0);
+    sum_FR(:,j) = v.*exp(1i*4*pi*(frecs')/ct*z0);
 
 end
 
