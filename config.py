@@ -6,25 +6,25 @@ y = 2
 z = 6
 zmin = 11
 z0 = 8
-ro = 10
+ro = 100 #10
 n_r = round(x*y*z*ro)
 
 ###### ATENUACIÓN #########
 at = 2.15e-5
-a_r = 0.0035 #
-a_t = 0.015
+a_r = 0.0035  #radio reflectores
+a_t = 0.05  #radio tejido
 ######## DATOS CASQUETE #######
 d = 1.5/20/2                     #Distancia mínima entre nodos (1.5 es ca)
-r = 3       #                   #Radio casquete
-Rc = 14     #                   #Radio de curvatura
+r = 3                          #Radio casquete
+Rc = 14                        #Radio de curvatura
 h = Rc*(1-np.sqrt(1-(r/Rc)**2))    #Altura casquete
 
 ######### TEJIDOS E INTERFASES ######
 x_t = np.arange(-0.8,3.8,0.035)
 y_t = np.arange(-0.8,0.8,0.035)
-z_1 = 9.8
+z_1 = 9
 z_2 = 11
-ro_t = 5
+ro_t = 500 #500
 
 
 #### FLUIDO 1 y 2
@@ -34,14 +34,15 @@ zt = rot*ct # impedancia tejido
 ca = 1.5300      # velocidad agua
 roa = 1005e-9  #densidada agua
 za = roa*ca #impedancia agua
-c_r = (za-zt)/(za+zt) #coeficiente reflexión
+coef_at = 0.01
+c_r = ((za-zt)/(za+zt))*coef_at #coeficiente reflexión
 c_t = 2*za/(zt+za) #coeficiente transmisión
 
 
 ####Propiedades núcleos ####
 rhon = 1090e-9
 cpln = 1.672
-a_n = 5e-3
+a_n = 5e-2
 cps = 0
 
 rop = 1064e-9
