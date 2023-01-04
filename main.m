@@ -1,11 +1,12 @@
-%%
+    %%
 %%%%%%% DATOS NUBE PUNTOS %%%%%
-x = 5;
-y = 2;
+x = 10;
+y = 8;
 z = 6;
 zmin = 11;
 ro = 10;
 n_r = round(x*y*z*ro);
+
 
 z0 = 8;
 
@@ -16,7 +17,7 @@ c = 1.5;
 
 %%%%%% ATENUACIÓN %%%%%%%%%
 at = 2.15e-5;
-a_r = 5e-3; %
+a_r = 3.5e-3; % radio reflectores
 a_t = 15e-3;
 %%%%%%%% DATOS CASQUETE %%%%%%%
 d = 1.5/20/2;                     %Distancia mínima entre nodos
@@ -35,13 +36,13 @@ ro_t = 500;
 
 
 %%%% FLUIDO 1 y 2
-rot = 1073e-9; %*e-9 % densidad tejido
-ct = 1.638;   % velocidad tejido
+rot = 1040e-9; %*e-9 % densidad tejido
+ct = 1.550;   % velocidad tejido
 zt = rot*ct; % impedancia tejido
-ca = 1.5;      % velocidad agua
-roa = 998e-9;  %densidada agua
+ca = 1.53;      % velocidad agua
+roa = 1005e-9;  %densidada agua
 za = roa*ca; %impedancia agua
-c_r = (za-zt)/(za+zt); %coeficiente reflexión
+c_r = ((za-zt)/(za+zt)); %coeficiente reflexión
 c_t = 2*za/(zt+za); %coeficiente transmisión
 
 %%%%Propiedades núcleos %%%%
@@ -58,16 +59,18 @@ tic
 Nodes = generate_mesh(Rc,h,d);
 % points = generate_random_points(x, y, z, zmin, n_r); 
 [tissue_points,n_t] = tissue_generator(x_t,y_t,z_1,z_2, ro_t);
-% interfase_points_1 = interfase_generator(x_t,y_t,z_1);
-interfase_points = interfase_generator(x_t,y_t,z_2);
-points = [tissue_points; interfase_points];
-% points = [0.25 0 8; 0.5 0 9; .75 0 10; 1 0 11; 1.25 0 12; 1.5 0 13; 1.75 0 14; 2 0 15; 2.25 0 16; 2.5 0 17; 2.75 0 18];
-% sub = squareform(pdist(points));
 
-% points = [tissue_points; reflector_points];
-n = length(interfase_points) + n_t;
-diag = ones(1,n);
-diag(n_t:end) = c_t;
+points = interfase_generator(x_t,y_t,z_2);
+
+
+% points = tissue_points;
+% points = [1.5 0 13];
+% n = length(interfase_points) + n_t;
+n=length(points);
+
+% diag = ones(1,n);
+% diag(n_t:end) = c_t;
+% sub = squareform(pdist(points));
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% RESTRINGIR FRECUENCIAS 1
 %%%% Espacio de análisis, 7mm, Tiempo de análisis=7*2/1.5=9.3us
@@ -133,15 +136,19 @@ parfor j = 1:length(pos)
 %             R = SL2(i)^2.*intern_dist + SL2_r(i).*eye(n);
 %             R = sparse(R);
 %             F = T.'*(R*sum(T,2));
-%             F = T1.'T2.'*SL2(i)(T2*sum(T1,2));
+%             F = T1.'*T2.'*SL2(i)(T2*sum(T1,2));
 %             sum_F(i,j) = sum(F)*E(i);
+            %%%%%%%%%ejecucion tejido %%%%%%%%
             T1 = mat_T(nodes_steps(:,:,j), points, kt(i));
-            diag = [SL2(i)*ones(1,n_t), c_r*ones(1,n-n_t)];
-            R = diag.*eye(n);
+%             diag = [SL2(i)*ones(1,n_t), c_r*ones(1,n-n_t)];
+            R = c_r.*eye(n);
             R = sparse(R);
             F = T1.'*(R*sum(T1,2));
+            %%%%%%%%%ejecucion interfase-reflectores %%%%%
+%             T1 = mat_T(nodes_steps(:,:,j), interfase_points, kt(i));
 %             T2 = exp(-1i*ka(i).*t2)./t2;
 %             F = T1.'*T2.'*SL2_r(i)*(T2*sum(T1,2));
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             v(i) = sum(F)*E(i);
         end
     end
@@ -151,6 +158,7 @@ end
 
 sum_FR = sum_FR*c_t^2; % Para reflectores
 sum_F_t = ifft(sum_FR);
+save(datestr(now) + ".mat")
 
 toc
 imagesc(pos,linspace(z0,z0+(2048-1)/fs/2*ca, 2048)-0.15, abs(sum_F_t))
@@ -158,12 +166,14 @@ daspect([1 1 1])
 colormap('jet')
 
 
-% scatter3(points(:,1), points(:,2), points(:,3), "filled")
+% scatter3(points(:,1), points(:,2), points(:,3), 'MarkerEdgeColor','k','MarkerFaceColor',[1 .6 .6])
 % hold on
-% scatter3(Nodes(:,1),Nodes(:,2),Nodes(:,3), "filled")
-
-
-
+% scatter3(Nodes(:,1)+3.5,Nodes(:,2),Nodes(:,3), 'MarkerEdgeColor','k','MarkerFaceColor',[0 .75 .75])
+% xlabel('x [mm]')
+% zlabel('z [mm]')
+% ylabel('y [mm]')
+% title("Desplazamiento del transductor")
+% daspect([1 1 1])
 
 %%%%%% CAPTURADOR DE GIFS
 
