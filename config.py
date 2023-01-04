@@ -4,15 +4,15 @@ import numpy as np
 x = 5
 y = 2
 z = 6
-zmin = 11
+zmin = 13
 z0 = 8
-ro = 100 #10
+ro = 500 #10
 n_r = round(x*y*z*ro)
 
 ###### ATENUACIÓN #########
 at = 2.15e-5
 a_r = 0.0035  #radio reflectores
-a_t = 0.05  #radio tejido
+a_t = 0.025  #radio tejido
 ######## DATOS CASQUETE #######
 d = 1.5/20/2                     #Distancia mínima entre nodos (1.5 es ca)
 r = 3                          #Radio casquete
@@ -22,8 +22,8 @@ h = Rc*(1-np.sqrt(1-(r/Rc)**2))    #Altura casquete
 ######### TEJIDOS E INTERFASES ######
 x_t = np.arange(-0.8,3.8,0.035)
 y_t = np.arange(-0.8,0.8,0.035)
-z_1 = 9
-z_2 = 11
+z_1 = 11
+z_2 = 13
 ro_t = 500 #500
 
 

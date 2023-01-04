@@ -4,8 +4,10 @@ import mpmath
 mpmath.mp.pretty = True
 from scipy.spatial.distance import cdist
 from numba import njit
+from scipy.signal import ellipord, ellip, filtfilt, hilbert
 
 def tissue_generator(x_t,y_t,z1,z2, ro):
+    np.random.seed(133993219)
     tissue_coords = np.array([[x_t[0],x_t[-1]], [y_t[0],y_t[-1]], [z1,z2]]).T
 
     n = round(ro*(x_t[-1] - x_t[0])*(y_t[-1] - y_t[0])*(z2 - z1))
@@ -101,7 +103,7 @@ def interfase_generator(x,y,z):
 
 
 def generate_random_points(x,y,z,zmin,n):
-
+    np.random.seed(133993219)
     dims = [x, y, z]
 
     coords = np.zeros((2, 3))
@@ -150,6 +152,68 @@ def open(file):
     msg = "Vars loaded: {}".format(" ,".join([str(x) for x in list(vrs.keys())]))
     print(msg)
     return vrs
+
+
+def R(cells, points, cell_reflectivity, point_reflectivity,k):
+    n = len(cells)
+    m = len(points)
+    matrix = np.zeros((n+m, n+m),dtype = 'complex_')
+    
+    # Calculate cell-cell interaction
+    cell_distances = np.linalg.norm(cells[:, None] - cells, axis=2)
+    cell_interaction = (cell_reflectivity * cell_reflectivity) / cell_distances * np.exp(-1j * k * cell_distances)
+    matrix[:n, :n] = cell_interaction
+    
+    # Calculate cell-point interaction
+    cell_point_distances = np.linalg.norm(cells[:, None] - points, axis=2)
+    cell_point_interaction = (cell_reflectivity * point_reflectivity) / cell_point_distances * np.exp(-1j * k * cell_point_distances)
+    matrix[:n, n:] = cell_point_interaction
+    matrix[n:, :n] = cell_point_interaction.T
+
+     # Calculate diagonal elements
+    diagonal = np.concatenate((np.full(n, cell_reflectivity), np.full(m, point_reflectivity)))
+    np.fill_diagonal(matrix, diagonal)
+
+    return np.asarray(matrix)
+
+def trat_sen(sen_in, limit):
+    # Ruido
+    SNR = 80
+    np.random.seed(133993219)
+
+    # Limitación
+    sen_lim = np.real(sen_in)
+    sen_lim[sen_lim > limit] = limit
+    sen_lim[sen_lim < -limit] = -limit
+
+    # Filtrado en frecuencia
+    fs = 150
+    Rp = 0.1
+    Rs = 60
+    Nfil, Wp = ellipord(np.array([10, 30])/fs*2, np.array([5, 35])/fs*2, Rp, Rs)  # Frecuencias en MHz
+    bf, af = ellip(Nfil, Rp, Rs, Wp, btype="bandpass")  # Pasabanda
+    sen_filt = filtfilt(bf, af, sen_lim, axis=0, padlen = 3*(max(len(af), len(bf)) - 1))
+
+    # Envolvente
+    sen_out = np.reshape(np.abs(hilbert(np.reshape(sen_filt,-1, order="F"))), (sen_filt.shape[0], sen_filt.shape[1]), order="F")
+
+    return sen_out
+
+
+def calculate_matrix(cells, cell_reflectivity, k):
+    n = cells.shape[0]
+    matrix = np.zeros((n, n),dtype = 'complex_')
+    
+    # Calculate cell-cell interaction
+    cell_distances = np.linalg.norm(cells[:, np.newaxis] - cells, axis=2)
+    cell_interaction = (cell_reflectivity * cell_reflectivity) / cell_distances * np.exp(1j * k * cell_distances)
+    matrix[:n, :n] = cell_interaction
+
+    # Calculate diagonal elements
+    diagonal = cell_reflectivity * np.ones(n)
+    np.fill_diagonal(matrix, diagonal)
+    
+    return matrix
 
 if __name__ == "__main__":
     def linspace(start, stop, step=1.):

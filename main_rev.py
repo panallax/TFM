@@ -12,19 +12,36 @@ from config import *
 
 
 
-def runmain_tejido(j,f,freqind,nodes_steps,points,kt,SL2,E,n,n_t):
+# def runmain_tejido(j,f,freqind,nodes_steps,cells,interfase,kt,SL2,E,c_r):
+#     """
+#     Función con interfase
+#     """
+
+#     print(j)
+#     v = np.zeros((f),dtype = 'complex_')
+#     points = np.concatenate((cells, interfase))
+#     for i in range(f):
+#         if np.nonzero(freqind==i)[0].size > 0:
+#             T1 = mat_T(nodes_steps[:,:,j], points, kt[i])
+#             _R = R(cells, interfase, SL2[i], c_r,kt[i])
+#             F = T1.T*np.matmul(_R,np.sum(T1,1))       
+#             v[i] = np.sum(F)*E[i]
+#     return (j,v*np.exp(1j*4*np.pi*(frecs.T)/ct*z0))
+    
+
+def runmain_tejido(j,f,freqind,nodes_steps,points,kt,SL2,E):
+    """
+    Función sin interfase   
+    """
     print(j)
     v = np.zeros((f),dtype = 'complex_')
     for i in range(f):
         if np.nonzero(freqind==i)[0].size > 0:
             T1 = mat_T(nodes_steps[:,:,j], points, kt[i])
-            diag = np.concatenate((SL2[i]*np.ones(n_t), c_r*np.ones(n-n_t)))
-            R = diag*np.identity(n)
+            R = calculate_matrix(points, SL2[i], kt[i])
             F = T1.T*np.matmul(R,np.sum(T1,1))       
             v[i] = np.sum(F)*E[i]
-
     return (j,v*np.exp(1j*4*np.pi*(frecs.T)/ct*z0))
-    
 
 def runmain_reflectores(j,f,t2,freqind,nodes_steps,interfase_points,kt,ka,SL2,E):
     print(j)
@@ -94,9 +111,8 @@ if __name__ == "__main__":
     
     if sim == "tejido":
         (tissue_points,n_t) = tissue_generator(x_t,y_t,z_1,z_2, ro_t)
-        points = np.concatenate((tissue_points, interfase_points))
-        n = len(interfase_points) + n_t
-        result = pool.starmap_async(runmain_tejido, ((j,f,freqind,nodes_steps,points,kt,SL2,E,n,n_t) for j in range(len(pos))))
+        result = pool.starmap_async(runmain_tejido, ((j,f,freqind,nodes_steps,tissue_points,kt,SL2,E) for j in range(len(pos))))
+        # result = pool.starmap_async(runmain_tejido, ((j,f,freqind,nodes_steps,tissue_points, interfase_points,kt,SL2,E,c_r) for j in range(len(pos))))
 
     if sim == "reflectores":
         reflectors = generate_random_points(x, y, z, zmin, n_r)
@@ -117,12 +133,8 @@ if __name__ == "__main__":
     name = "resultados/" + sim + "_" + str(t.tm_mon)  + "_" + str(t.tm_mday)  + "_" + str(t.tm_hour) + "_" + str(t.tm_min)
    
     if sim == "tejido":
-        # np.savez(name, pos=pos, z0=z0, fs=fs, ca=ca, a=a, points=points, interfase_points = interfase_points, coef_at = coef_at )
-        np.savez(name , sum_FR=sum_FR, sum_F_t=sum_F_t, pos=pos, z0=z0, fs=fs, ca=ca, a=a, points=points, interfase_points = interfase_points, coef_at = coef_at, tissue_point = tissue_points )
+        np.savez(name , sum_FR=sum_FR, sum_F_t=sum_F_t, pos=pos, z0=z0, fs=fs, ca=ca, a=a, tissue_points=tissue_points, interfase_points = interfase_points, coef_at = coef_at )
         # scipy.io.savemat(name + ".mat", {"sum_F_t": sum_F_t})
     if sim == "reflectores":
         np.savez("resultados/" + sim + "_" + str(t.tm_mon)  + "_" + str(t.tm_mday)  + "_" + str(t.tm_hour) + "_" + str(t.tm_min) , sum_FR=sum_FR, sum_F_t=sum_F_t, pos=pos, z0=z0, fs=fs, ca=ca, a=a, interfase_points = interfase_points, coef_at = coef_at )
         # scipy.io.savemat(name + ".mat", {"sum_F_t": sum_F_t})
-# scatter3(points(:,1), points(:,2), points(:,3), "filled")
-# hold on
-# scatter3(Nodes(:,1),Nodes(:,2),Nodes(:,3), "filled")
